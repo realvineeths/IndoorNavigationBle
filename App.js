@@ -25,13 +25,15 @@ const App = () => {
     });
   };
 
+  // console.log(distance);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heartRateTitleWrapper}>
         <Text style={{ fontSize: 50, color: 'black' }}>Meters</Text>
         {distance.map((beacon, index) => (
           <View key={index}>
-            <Text style={{ fontSize: 300, color: 'black' }}>{beacon.distance}</Text>
+            <Text style={{ fontSize: 50, color: 'black' }}>{beacon.distance}</Text>
             <Text style={{ fontSize: 50, color: 'black' }}>ID: {beacon.id}</Text>
             <Text style={{ fontSize: 50, color: 'black' }}>RSSI: {beacon.rssi}</Text>
           </View>
