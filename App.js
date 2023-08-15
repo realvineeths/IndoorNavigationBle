@@ -1,14 +1,15 @@
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import {
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,LogBox
+  View,
+  LogBox,
 } from 'react-native';
 
 import useBLE from './useBLE';
-
 
 LogBox.ignoreLogs(['new NativeEventEmitter()']);
 
@@ -16,24 +17,31 @@ const App = () => {
   const { requestPermissions, scanForPeripherals, distance } = useBLE();
 
   const scanForDevices = () => {
-    requestPermissions((isGranted) => {
-      console.log(isGranted,"grant");
+    requestPermissions(isGranted => {
+      console.log(isGranted, 'grant');
       if (isGranted) {
         scanForPeripherals();
       }
     });
   };
 
+  // console.log(distance);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heartRateTitleWrapper}>
         <Text style={{ fontSize: 50, color: 'black' }}>Meters</Text>
-        <Text style={{ fontSize: 300, color: 'black' }}>{distance}</Text>
+        {distance.map((beacon, index) => (
+          <View key={index}>
+            <Text style={{ fontSize: 50, color: 'black' }}>{beacon.distance}</Text>
+            <Text style={{ fontSize: 50, color: 'black' }}>ID: {beacon.id}</Text>
+            <Text style={{ fontSize: 50, color: 'black' }}>RSSI: {beacon.rssi}</Text>
+          </View>
+        ))}
       </View>
       <TouchableOpacity onPress={scanForDevices} style={styles.ctaButton}>
         <Text style={styles.ctaButtonText}>Start</Text>
       </TouchableOpacity>
-
     </SafeAreaView>
   );
 };
