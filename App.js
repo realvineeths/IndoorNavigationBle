@@ -9,13 +9,11 @@ import {
   LogBox,
 } from 'react-native';
 import useBLE from './useBLE';
-import findSolution from './findCord';
 
 LogBox.ignoreLogs(['new NativeEventEmitter()']);
 
 const App = () => {
-  const { requestPermissions, scanForPeripherals, distance } = useBLE();
-  const {cordinates }= findSolution();
+  const { requestPermissions, scanForPeripherals, distance,cordinates } = useBLE();
   // console.log(cordinates);
   const scanForDevices = () => {
     requestPermissions(isGranted => {
@@ -39,11 +37,11 @@ const App = () => {
             <Text style={{ fontSize: 50, color: 'black' }}>RSSI: {beacon.rssi}</Text>
           </View>
         ))} */}
-        {/* <View>
+        <View>
         <Text style={{ fontSize: 50, color: 'black' }}>x:{cordinates[0]}</Text>
         <Text style={{ fontSize: 50, color: 'black' }}>y:{cordinates[1]}</Text>
-        <Text style={{ fontSize: 50, color: 'black' }}>z:{cordinates[2]}</Text>
-        </View> */}
+        {/* <Text style={{ fontSize: 50, color: 'black' }}>z:{cordinates[2]}</Text> */}
+        </View>
       </View>
       <TouchableOpacity onPress={scanForDevices} style={styles.ctaButton}>
         <Text style={styles.ctaButtonText}>Start</Text>

@@ -12,7 +12,7 @@ function determinantOfMatrix(mat) {
 }
 
 
-export default function findSolution(coeff) {
+function findSolution(coeff) {
 
     var [cordinates, setCordinates] = useState([0,0,0]);
 
@@ -85,8 +85,11 @@ export default function findSolution(coeff) {
       }
       // answer.setText("Location not found!");
     }
-
+    console.log(cordinates);
     return {
         cordinates
     };
 }
+
+
+export default findSolution;
