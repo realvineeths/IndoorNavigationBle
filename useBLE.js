@@ -22,7 +22,8 @@ function disCalc(setCordinates){
     trilateration.setDistance(1, b);
     trilateration.setDistance(2, c);
     var pos = trilateration.calculatePosition();
-    console.log(pos);
+    setCordinates(pos)
+    // console.log(a,b,c,pos);
   }
 
 }
@@ -103,12 +104,11 @@ function useBLE() {
           // for (let x = 0; x < beaconData.length; x++) {
           //   console.log(beaconData[x]);
           // }
-          trilateration.addBeacon(0, trilateration.vector(-2, 2));
-          trilateration.addBeacon(1, trilateration.vector(2, 2));
-          trilateration.addBeacon(2, trilateration.vector(2, -2));
+          trilateration.addBeacon(0, trilateration.vector(-2.01, 2));
+          trilateration.addBeacon(1, trilateration.vector(2.1, 2.1));
+          trilateration.addBeacon(2, trilateration.vector(2, -2.04));
           disCalc(setCordinates);
           setDistance([...beaconData]);
-
         }
         if (error) {
           console.log(error, 'error');
