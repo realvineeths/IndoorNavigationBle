@@ -14,7 +14,7 @@ LogBox.ignoreLogs(['new NativeEventEmitter()']);
 
 const App = () => {
   const { requestPermissions, scanForPeripherals, distance,cordinates } = useBLE();
-  console.log(cordinates);
+  // console.log(cordinates);
   const scanForDevices = () => {
     requestPermissions(isGranted => {
       console.log(isGranted, 'grant');
@@ -24,12 +24,11 @@ const App = () => {
     });
   };
 
-  // console.log(distance);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heartRateTitleWrapper}>
-        <Text style={{ fontSize: 50, color: 'black' }}>Meters</Text>
+        <Text style={{ fontSize: 50, color: 'black' }}>Position:</Text>
         {/* {distance.map((beacon, index) => (
           <View key={index}>
             <Text style={{ fontSize: 50, color: 'black' }}>{beacon.distance}</Text>

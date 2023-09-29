@@ -17,6 +17,7 @@ var c=-1;
 function disCalc(setCordinates){
 
   // console.log(a,b,c);
+  // console.log(a,b,c);
   if(a!=-1 && b!=-1 && c!=-1){
     trilateration.setDistance(0, a);
     trilateration.setDistance(1, b);
@@ -104,9 +105,9 @@ function useBLE() {
           // for (let x = 0; x < beaconData.length; x++) {
           //   console.log(beaconData[x]);
           // }
-          trilateration.addBeacon(0, trilateration.vector(-2.01, 2));
-          trilateration.addBeacon(1, trilateration.vector(2.1, 2.1));
-          trilateration.addBeacon(2, trilateration.vector(2, -2.04));
+          trilateration.addBeacon(0, trilateration.vector(-5.01, 5));
+          trilateration.addBeacon(1, trilateration.vector(5.1, 5.1));
+          trilateration.addBeacon(2, trilateration.vector(5, -5.04));
           disCalc(setCordinates);
           setDistance([...beaconData]);
         }
