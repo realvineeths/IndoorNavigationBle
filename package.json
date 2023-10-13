@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@rnmapbox/maps": "^10.0.15",
     "react": "18.2.0",
     "react-native": "0.72.1",
     "react-native-ble-plx": "^2.0.3",

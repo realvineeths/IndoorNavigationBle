@@ -105,9 +105,16 @@ function useBLE() {
           // for (let x = 0; x < beaconData.length; x++) {
           //   console.log(beaconData[x]);
           // }
-          trilateration.addBeacon(0, trilateration.vector(-5.01, 5));
-          trilateration.addBeacon(1, trilateration.vector(5.1, 5.1));
-          trilateration.addBeacon(2, trilateration.vector(5, -5.04));
+
+          // RIGHT SIDE - 12.86147617,77.66430172
+          // CHAIRMAN - 12.86148900,77.66417709
+          // CONF ROOM - 12.86137334,77.66416349
+          // EQUIP ROOM - 12.86133558,77.66429186
+          // STAIRCASE - 12.86140970,77.66431894
+
+          trilateration.addBeacon(0, trilateration.vector(77.66416349,12.86137334,));
+          trilateration.addBeacon(1, trilateration.vector(77.66417709,12.86148900));
+          trilateration.addBeacon(2, trilateration.vector(77.66430172,12.86147617));
           disCalc(setCordinates);
           setDistance([...beaconData]);
         }
