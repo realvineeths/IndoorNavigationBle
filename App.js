@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   View,
   LogBox,
+  Image,
+  Button,
+  Dimensions
 } from 'react-native';
 import useBLE from './useBLE';
 import MapboxGL from '@rnmapbox/maps';
@@ -19,6 +22,10 @@ MapboxGL.setWellKnownTileServer('Mapbox');
 
 LogBox.ignoreLogs(['new NativeEventEmitter()']);
 
+const MAP_WIDTH = Dimensions.get('window').width;
+const MAP_HEIGHT = Dimensions.get('window').height;
+
+console.log(MAP_HEIGHT,MAP_WIDTH);
 
 const App = () => {
   // const coordinates = [77.6649683,12.8619337];
@@ -31,19 +38,18 @@ const App = () => {
       }
     });
   };  
-  const coordinates = [77.66431108610999, 12.861412619615328];
-  // const coordinates = [cordinates.x, cordinates.y];
+  // console.log(cordinates.x,cordinates.y);
+  const coordinates = [77.66431108610999, 12.861412619615328];  
   return (
     <View style={styles.page}>
       <View style={styles.container}>
         <MapboxGL.MapView style={styles.map}>
-          <MapboxGL.Camera zoomLevel={20}
-           centerCoordinate={coordinates} />
-          
+          <MapboxGL.Camera zoomLevel={16}
+           centerCoordinate={coordinates} />          
             {
             statesData.features.map((feature, index) => (
               <MapboxGL.ShapeSource key={`source${index}`} id={`source${index}`} shape={feature}>
-                <MapboxGL.FillLayer id={`fill${index}`} style={{ fillColor: "blue" }}  />
+                <MapboxGL.FillLayer id={`fill${index}`} style={{ fillColor: "white" }}  />
                 <MapboxGL.LineLayer
                   id={`line${index}`}
                   style={{ lineColor: "red", lineWidth: 2 }} 
@@ -52,26 +58,34 @@ const App = () => {
             ))
             }
             {/* <MapboxGL.PointAnnotation id="marker" coordinate={coordinates}  /> */}
-          <MapboxGL.MarkerView id={"marker"} coordinate={[cordinates.x,cordinates.y]}>
+          <MapboxGL.MarkerView id={"marker"} coordinate={[cordinates[0],cordinates[1]]}>
                       <View>
                         <View style={styles.markerContainer}>
                           <Image
-                            source={require("./images2.png")}
+                            source={require("./images3.png")}
                             style={{
                               width: 20,
-                              height: 30,
-                              backgroundColor: "red",
+                              height: 30,                              
                               resizeMode: "cover",
                             }}
                           />
                         </View>
                       </View>
             </MapboxGL.MarkerView>
-           <TouchableOpacity onPress={scanForDevices} style={styles.ctaButton}>
+           {/* <TouchableOpacity onPress={scanForDevices} style={styles.ctaButton}>
            <Text style={styles.ctaButtonText}>Start</Text>
-           </TouchableOpacity>
+           </TouchableOpacity> */}
 
+          {/* <Button
+            onPress={scanForDevices}
+            title="Your Location"
+            color="#841584"
+            
+          /> */}
          </MapboxGL.MapView>
+         <View style={styles.ctaButton}>
+              <Button title="Button" onPress={scanForDevices}></Button>
+          </View>         
          </View>
        </View>
   );
@@ -107,6 +121,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 5,
     flex: 1,
+  },
+  ctaButton: {
+    backgroundColor: 'purple',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // height: 50,
+    // marginHorizontal: 20,
+    // marginBottom: 5,
+    borderRadius: 8,
+    zIndex:10,
+    position:'absolute',
+    backgroundColor:"transparent",
+    top:"90%",
+    left:"40%"
   }
 });
 
