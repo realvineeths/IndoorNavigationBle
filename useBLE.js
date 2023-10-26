@@ -18,6 +18,7 @@ function degreesToRadians(degrees) {
   return degrees * (Math.PI / 180);
 }
 
+
 function getCartesian(lat,lon)
 {
   const la1=degreesToRadians(lat);
