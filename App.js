@@ -25,7 +25,8 @@ LogBox.ignoreLogs(['new NativeEventEmitter()']);
 const MAP_WIDTH = Dimensions.get('window').width;
 const MAP_HEIGHT = Dimensions.get('window').height;
 
-console.log(MAP_HEIGHT,MAP_WIDTH);
+// console.log(MAP_HEIGHT,MAP_WIDTH);
+
 
 const App = () => {
   // const coordinates = [77.6649683,12.8619337];
@@ -44,15 +45,26 @@ const App = () => {
     <View style={styles.page}>
       <View style={styles.container}>
         <MapboxGL.MapView style={styles.map}>
-          <MapboxGL.Camera zoomLevel={16}
+          <MapboxGL.Camera zoomLevel={20}
            centerCoordinate={coordinates} />          
             {
             statesData.features.map((feature, index) => (
+              
               <MapboxGL.ShapeSource key={`source${index}`} id={`source${index}`} shape={feature}>
                 <MapboxGL.FillLayer id={`fill${index}`} style={{ fillColor: "white" }}  />
                 <MapboxGL.LineLayer
                   id={`line${index}`}
                   style={{ lineColor: "red", lineWidth: 2 }} 
+                />
+                <MapboxGL.SymbolLayer
+                  id={`label${index}`}
+                  style={{
+                    textField: feature.properties.name,
+                    textSize: 12,
+                    textColor: 'black',
+                    textAnchor: 'center',
+                    textAllowOverlap: true,
+                  }}
                 />
               </MapboxGL.ShapeSource>
             ))
@@ -84,7 +96,7 @@ const App = () => {
           /> */}
          </MapboxGL.MapView>
          <View style={styles.ctaButton}>
-              <Button title="Button" onPress={scanForDevices}></Button>
+              <Button title="Start" onPress={scanForDevices}></Button>
           </View>         
          </View>
        </View>
