@@ -56,11 +56,11 @@ function calculate()
   let circle2 = new MathTool.Circle(
     new MathTool.Point(device2Point.x, device2Point.y),
     distances[1]
-);
+  );
   let circle3 = new MathTool.Circle(
     new MathTool.Point(device3Point.x, device3Point.y),
     distances[2]
-);
+  );
 
 while (true) {
   // First look at whether there are intersections between the three circles.
