@@ -4,54 +4,67 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import { BleManager, ScanMode } from 'react-native-ble-plx';
 import { PERMISSIONS, requestMultiple } from 'react-native-permissions';
 import DeviceInfo from 'react-native-device-info';
-import trilateration from './findCord';
+// import trilateration from './findCord';
 
 
 const bleManager = new BleManager();
 let beaconData = [];
 
-var a=-1;
-var b=-1;
-var c=-1;
 
-function degreesToRadians(degrees) {
-  return degrees * (Math.PI / 180);
+var a = 4.8034392256422;
+var b = 0.27667516330004;
+var c = 1.0827771103723;
+
+
+function cartesian(latitude, longitude) {
+  const MAP_WIDTH = 360;
+  const MAP_HEIGHT = 761.6666666666666;
+
+  var x = (MAP_WIDTH / 360.0) * (180 + longitude);
+  var y = (MAP_HEIGHT / 180.0) * (90 - latitude);
+
+  return [x*Math.pow(10,4), y*Math.pow(10,4)];
 }
 
 
-function getCartesian(lat,lon)
-{
-  const la1=degreesToRadians(lat);
-  const lo1=degreesToRadians(lon);
-  const R=6371 ;
-  var x = R * Math.cos(la1) * Math.cos(lo1)
-  var y = R * Math.cos(la1) * Math.sin(lo1)
-  return [x,y];
+function getcord(x, y) {
+  x=x*Math.pow(10,-4);
+  y=y*Math.pow(10,-4);
+  const MAP_WIDTH = 360;
+  const MAP_HEIGHT = 761.6666666666666;
+  var longitude = (x * (360.0 / MAP_WIDTH)) - 180;
+  var latitude = 90 - (y * (180.0 / MAP_HEIGHT));
+  return [latitude, longitude]
 }
 
 
-function disCalc(setCordinates){
+function trilateration(beacons) {
+  // beacons: array of { x, y, distance }
 
-  // console.log(a,b,c);
-  // console.log(a,b,c);
-  if(a!=-1 && b!=-1 && c!=-1){
-    trilateration.setDistance(0, a);
-    trilateration.setDistance(1, b);
-    trilateration.setDistance(2, c);
-    var pos = trilateration.calculatePosition();
-    const lat = Math.asin(z / R)
-    const lon = Math.atan2(y, x)
-    console.log("cc",pos.x,pos.y);
-    setCordinates([pos.x,pos.y])
-    // console.log(a,b,c,pos);
-  }
+  const beacon1 = beacons[0];
+  const beacon2 = beacons[1];
+  const beacon3 = beacons[2];
 
+  const A = 2 * (beacon2.x - beacon1.x);
+  const B = 2 * (beacon2.y - beacon1.y);
+  const C = Math.pow(beacon1.distance, 2) - Math.pow(beacon2.distance, 2) - Math.pow(beacon1.x, 2) + Math.pow(beacon2.x, 2) - Math.pow(beacon1.y, 2) + Math.pow(beacon2.y, 2);
+
+  const D = 2 * (beacon3.x - beacon2.x);
+  const E = 2 * (beacon3.y - beacon2.y);
+  const F = Math.pow(beacon2.distance, 2) - Math.pow(beacon3.distance, 2) - Math.pow(beacon2.x, 2) + Math.pow(beacon3.x, 2) - Math.pow(beacon2.y, 2) + Math.pow(beacon3.y, 2);
+
+  const x = (C - (F * B / E)) / (A - (D * B / E));
+  const y = (F - (D * C / A)) / (E - (B * D / A));
+
+  return { x, y };
 }
+
+
 
 
 function useBLE() {
   const [distance, setDistance] = useState([]);
-  var [cordinates, setCordinates] = useState([77.6649683,12.8619337]);
+  var [cordinates, setCordinates] = useState([0,0,0]);
 
 
   const requestPermissions = async (cb) => {
@@ -109,45 +122,42 @@ function useBLE() {
             beaconData.pop();
           }
 
-          if(beacon.id.includes('37')){
-            a=beacon.distance;
-          }
-          if(beacon.id.includes('4B')){
-            b=beacon.distance;
-          }
-          if(beacon.id.includes('48')){
-            c=beacon.distance;
-          }
-
-
-          // console.log(beacon);
-          // for (let x = 0; x < beaconData.length; x++) {
-          //   console.log(beaconData[x]);
+          // if(beacon.id.includes('37')){
+          //   a=beacon.distance;
           // }
+          // if(beacon.id.includes('4B')){
+          //   b=beacon.distance;
+          // }
+          // if(beacon.id.includes('48')){
+          //   c=beacon.distance;
+          // }
+          // a = 4.8034392256422;
+          // b = 0.27667516330004;
+          // c = 1.0827771103723;
 
-          // RIGHT SIDE - 12.86147617,77.66430172
-          // CHAIRMAN - 12.86148900,77.66417709
-          // CONF ROOM - 12.86137334,77.66416349
-          // EQUIP ROOM - 12.86133558,77.66429186
-          // STAIRCASE - 12.86140970,77.66431894
-          
-          // const la1=degreesToRadians(77.66416349);
-          // const lo1=degreesToRadians(12.86137334);
-          // const la2=degreesToRadians(77.66417709);
-          // const lo2=degreesToRadians(12.86148900);
-          // const la3=degreesToRadians(77.66430172);
-          // const lo3=degreesToRadians(12.86147617);
-          
-          const cart1=getCartesian(77.66416349,12.86137334);
-          const cart2=getCartesian(77.66417709,12.86148900);
-          const cart3=getCartesian(77.66430172,12.86147617);
+          const cart1 = cartesian(12.86137334, 77.66416349);
+          const cart2 = cartesian(12.86148900, 77.66417709);
+          const cart3 = cartesian(12.86147617, 77.66430172);
 
-          trilateration.addBeacon(0, trilateration.vector(cart1[0],cart1[1]));
-          // trilateration.addBeacon(1, trilateration.vector(5,2.334344));
-          trilateration.addBeacon(1, trilateration.vector(cart2[0],cart2[1]));
-          // trilateration.addBeacon(2, trilateration.vector(6,-2.334));
-          trilateration.addBeacon(2, trilateration.vector(cart3[0],cart3[1]));
-          disCalc(setCordinates);
+          var  arr=[];
+          // console.log("in");
+          if(a!=-1 && b!=-1 && c!=-1)
+          {
+            const beacons = [
+              { x: cart1[0], y: cart1[1], distance: a },
+              { x: cart2[0], y: cart2[1], distance: b },
+              { x: cart3[0], y: cart3[1], distance: c },
+            ];
+            
+            const userPosition = trilateration(beacons);    
+            arr=getcord(userPosition.x, userPosition.y);       
+            // console.log(userPosition); 
+            // arr.push(userPosition.x);
+            // arr.push(userPosition.y);
+          }
+
+          setCordinates(arr);
+          // disCalc(setCordinates);
           setDistance([...beaconData]);
         }
         if (error) {

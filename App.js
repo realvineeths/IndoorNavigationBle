@@ -39,7 +39,7 @@ const App = () => {
       }
     });
   };  
-  // console.log(cordinates.x,cordinates.y);
+  // console.log(cordinates);
   const coordinates = [77.66431108610999, 12.861412619615328];  
   return (
     <View style={styles.page}>
@@ -70,7 +70,7 @@ const App = () => {
             ))
             }
             {/* <MapboxGL.PointAnnotation id="marker" coordinate={coordinates}  /> */}
-          <MapboxGL.MarkerView id={"marker"} coordinate={[cordinates[0],cordinates[1]]}>
+          <MapboxGL.MarkerView id={"marker"} coordinate={[cordinates[1],cordinates[0]]}>
                       <View>
                         <View style={styles.markerContainer}>
                           <Image
