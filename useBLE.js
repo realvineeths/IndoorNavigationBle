@@ -4,130 +4,61 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import { BleManager, ScanMode } from 'react-native-ble-plx';
 import { PERMISSIONS, requestMultiple } from 'react-native-permissions';
 import DeviceInfo from 'react-native-device-info';
-import trilateration from './findCord';
+// import trilateration from './findCord';
 // import MathTool from  './MathTool';
 import {MathTool} from './MathTool';
 
 const bleManager = new BleManager();
 let beaconData = [];
 
-var a=-1;
-var b=-1;
-var c=-1;
-
-// function disCalc(setCordinates){
-
-//   // console.log(a,b,c);
-//   if(a!=-1 && b!=-1 && c!=-1){
-//     trilateration.setDistance(0, a);
-//     trilateration.setDistance(1, b);
-//     trilateration.setDistance(2, c);
-//     var pos = trilateration.calculatePosition();
-//     setCordinates(pos)
-//     // console.log(a,b,c,pos);
-
-//   }
-
-// }
+var a = 4.8034392256422;
+var b = 0.27667516330004;
+var c = 1.0827771103723;
 
 
-function calculate()
-{
+function cartesian(latitude, longitude) {
+  const MAP_WIDTH = 360;
+  const MAP_HEIGHT = 761.6666666666666;
 
-  let device1Point;
-  let device2Point;
-  let device3Point;
-  const mt1=new MathTool();
-  const mt2=new MathTool();
-  const mt3=new MathTool();
-  device1Point = mt1.Point(0, 0);
-  device2Point = mt2.Point(3.1, 0);
-  device3Point = mt3.Point(0,4.1);
+  var x = (MAP_WIDTH / 360.0) * (180 + longitude);
+  var y = (MAP_HEIGHT / 180.0) * (90 - latitude);
 
-  let distances=[];
-  
-  distances.push(a);
-  distances.push(b);
-  distances.push(c);
-
-  let circle1 = new MathTool.Circle(
-    new MathTool.Point(device1Point.x, device1Point.y),
-    distances[0]);
-  let circle2 = new MathTool.Circle(
-    new MathTool.Point(device2Point.x, device2Point.y),
-    distances[1]
-  );
-  let circle3 = new MathTool.Circle(
-    new MathTool.Point(device3Point.x, device3Point.y),
-    distances[2]
-  );
-
-while (true) {
-  // First look at whether there are intersections between the three circles.
-  // If 1、2 no intersection between the two circles
-  if (!MathTool.isTwoCircleIntersect(circle1, circle2)) {
-      // Try increasing the radius of a circle，Who is bigger and who increases
-      if (circle1.r > circle2.r) {
-          circle1.r += 0.01;
-      } else {
-          circle2.r += 0.01;
-      }
-      continue;
-  }
-  // If there is no intersection between the two circles of 1, 3
-  if (!MathTool.isTwoCircleIntersect(circle1, circle3)) {
-      // Try increasing the radius
-      // If the radius of c3 is smaller than either of them
-      if (circle3.r < circle1.r && circle3.r < circle2.r) {
-          circle1.r += 0.01;
-          circle2.r += 0.01;
-      } else {
-          circle3.r += 0.01;
-      }
-      continue;
-  }
-  // If there is no intersection between the two originals
-  if (!MathTool.isTwoCircleIntersect(circle2, circle3)) {
-      // Try increasing the radius
-      // If the radius of c3 is smaller than either of them
-      if (circle3.r < circle1.r && circle3.r < circle2.r) {
-          circle1.r += 0.01;
-          circle2.r += 0.01;
-      } else {
-          circle3.r += 0.01;
-      }
-      continue;
-  }
-
-  let temp1 = MathTool.getIntersectionPointsOfTwoIntersectCircle(circle1, circle2);
-  let temp2 = MathTool.getIntersectionPointsOfTwoIntersectCircle(circle2, circle3);
-  let temp3 = MathTool.getIntersectionPointsOfTwoIntersectCircle(circle3, circle1);
-  // The point where the intersection of the two circles of 1 and 2 takes y > 0
-  let resultPoint1 = temp1.p1.y > 0 ?
-          new MathTool.Point(temp1.p1.x, temp1.p1.y):
-          new MathTool.Point(temp1.p2.x, temp1.p2.y);
-  // Log.d("resultPoint1", temp1.p1.toString() + "  " + temp1.p2.toString());
-  // The intersection of 2, 3 and 2 circles takes the mean of the two
-  let resultPoint2 = new MathTool.Point(
-          max(temp2.p1.x, temp2.p2.x),
-          max(temp2.p1.y, temp2.p2.y)
-  );
-  // 3, 1 the intersection of the two circles takes the point where x > 0
-  let resultPoint3 = temp3.p1.x > 0 ?
-          new MathTool.Point(temp3.p1.x, temp3.p1.y):
-          new MathTool.Point(temp3.p2.x, temp3.p2.y);
-
-  // Find the center point of three points
-  let resultPoint = MathTool.getCenterOfThreePoint(
-          resultPoint1,
-          resultPoint2,
-          resultPoint3
-  );
-
-  }
-
-  return resultPoint;
+  return [x*Math.pow(10,4), y*Math.pow(10,4)];
 }
+
+
+function getcord(x, y) {
+  x=x*Math.pow(10,-4);
+  y=y*Math.pow(10,-4);
+  const MAP_WIDTH = 360;
+  const MAP_HEIGHT = 761.6666666666666;
+  var longitude = (x * (360.0 / MAP_WIDTH)) - 180;
+  var latitude = 90 - (y * (180.0 / MAP_HEIGHT));
+  return [latitude, longitude]
+}
+
+
+function trilateration(beacons) {
+  // beacons: array of { x, y, distance }
+
+  const beacon1 = beacons[0];
+  const beacon2 = beacons[1];
+  const beacon3 = beacons[2];
+
+  const A = 2 * (beacon2.x - beacon1.x);
+  const B = 2 * (beacon2.y - beacon1.y);
+  const C = Math.pow(beacon1.distance, 2) - Math.pow(beacon2.distance, 2) - Math.pow(beacon1.x, 2) + Math.pow(beacon2.x, 2) - Math.pow(beacon1.y, 2) + Math.pow(beacon2.y, 2);
+
+  const D = 2 * (beacon3.x - beacon2.x);
+  const E = 2 * (beacon3.y - beacon2.y);
+  const F = Math.pow(beacon2.distance, 2) - Math.pow(beacon3.distance, 2) - Math.pow(beacon2.x, 2) + Math.pow(beacon3.x, 2) - Math.pow(beacon2.y, 2) + Math.pow(beacon3.y, 2);
+
+  const x = (C - (F * B / E)) / (A - (D * B / E));
+  const y = (F - (D * C / A)) / (E - (B * D / A));
+
+  return { x, y };
+}
+
 
 
 
@@ -191,27 +122,39 @@ function useBLE() {
             beaconData.pop();
           }
 
-          if(beacon.id.includes('37')){
-            a=beacon.distance;
-          }
-          if(beacon.id.includes('4B')){
-            b=beacon.distance;
-          }
-          if(beacon.id.includes('48')){
-            c=beacon.distance;
-          }
+          // if(beacon.id.includes('37')){
+          //   a=beacon.distance;
+          // }
+          // if(beacon.id.includes('4B')){
+          //   b=beacon.distance;
+          // }
+          // if(beacon.id.includes('48')){
+          //   c=beacon.distance;
+          // }
+          // a = 4.8034392256422;
+          // b = 0.27667516330004;
+          // c = 1.0827771103723;
 
+          const cart1 = cartesian(12.86137334, 77.66416349);
+          const cart2 = cartesian(12.86148900, 77.66417709);
+          const cart3 = cartesian(12.86147617, 77.66430172);
 
-          // trilateration.addBeacon(0, trilateration.vector(-2.01, 2));
-          // trilateration.addBeacon(1, trilateration.vector(2.1, 2.1));
-          // trilateration.addBeacon(2, trilateration.vector(2, -2.04));
           var  arr=[];
+          // console.log("in");
           if(a!=-1 && b!=-1 && c!=-1)
           {
-            var result=calculate();
-            arr.push(result.x);
-            arr.push(result.y);
-          }              
+            const beacons = [
+              { x: cart1[0], y: cart1[1], distance: a },
+              { x: cart2[0], y: cart2[1], distance: b },
+              { x: cart3[0], y: cart3[1], distance: c },
+            ];
+            
+            const userPosition = trilateration(beacons);    
+            arr=getcord(userPosition.x, userPosition.y);       
+            // console.log(userPosition); 
+            // arr.push(userPosition.x);
+            // arr.push(userPosition.y);
+          }
 
           setCordinates(arr);
           // disCalc(setCordinates);

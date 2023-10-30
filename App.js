@@ -38,8 +38,8 @@ const App = () => {
           </View>
         ))} */}
         <View>
-        <Text style={{ fontSize: 50, color: 'black' }}>x:{cordinates.x}</Text>
-        <Text style={{ fontSize: 50, color: 'black' }}>y:{cordinates.y}</Text>
+        <Text style={{ fontSize: 50, color: 'black' }}>x:{cordinates[0]}</Text>
+        <Text style={{ fontSize: 50, color: 'black' }}>y:{cordinates[1]}</Text>
         {/* <Text style={{ fontSize: 50, color: 'black' }}>z:{cordinates[2]}</Text> */}
         </View>
       </View>
