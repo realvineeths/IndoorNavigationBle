@@ -7,13 +7,21 @@ import DeviceInfo from 'react-native-device-info';
 // import trilateration from './findCord';
 // import MathTool from  './MathTool';
 import {MathTool} from './MathTool';
+import KalmanFilter from 'kalmanjs';
+
 
 const bleManager = new BleManager();
 let beaconData = [];
 
-var a = 4.8034392256422;
-var b = 0.27667516330004;
-var c = 1.0827771103723;
+// var a = 4.8034392256422;
+// var a = 5.843414133735177;
+// var b = 0.27667516330004;
+// var b = 3.686945064519575;
+// var c = 4.298662347082277;
+// var c = 1.0827771103723;
+var a=-1;
+var b=-1;
+var c=-1;
 
 
 function cartesian(latitude, longitude) {
@@ -91,6 +99,10 @@ function useBLE() {
     return currentDistance;
   }
 
+  const kf1 = new KalmanFilter({R: 0.01, Q: 2});
+  const kf2 = new KalmanFilter({R: 0.01, Q: 2});
+  const kf3 = new KalmanFilter({R: 0.01, Q: 2});
+
 
   // var cordinates=[a,b,c];
   const scanForPeripherals = () =>
@@ -118,42 +130,58 @@ function useBLE() {
           beaconData.sort((a, b) => a.distance - b.distance);
 
           // Keep only the 3 closest beacons
-          if (beaconData.length > 3) {
-            beaconData.pop();
+          // if (beaconData.length > 3) {
+          //   beaconData.pop();
+          // }
+
+          const top3Objects = beaconData.slice(0, 3);
+
+          if(beacon.id.includes('37')){
+            a=beacon.distance;
+          }
+          if(beacon.id.includes('4B')){
+            b=beacon.distance;
+          }
+          if(beacon.id.includes('48')){
+            c=beacon.distance;
           }
 
-          // if(beacon.id.includes('37')){
-          //   a=beacon.distance;
-          // }
-          // if(beacon.id.includes('4B')){
-          //   b=beacon.distance;
-          // }
-          // if(beacon.id.includes('48')){
-          //   c=beacon.distance;
-          // }
-          // a = 4.8034392256422;
-          // b = 0.27667516330004;
-          // c = 1.0827771103723;
 
-          const cart1 = cartesian(12.86137334, 77.66416349);
-          const cart2 = cartesian(12.86148900, 77.66417709);
-          const cart3 = cartesian(12.86147617, 77.66430172);
+          // const cart1 = cartesian(12.86137334, 77.66416349);
+          const cart1 = [2,10];
+          // const cart2 = cartesian(12.86148900, 77.66417709);
+          const cart2 = [10,10];
+          // const cart3 = cartesian(12.86147617, 77.66430172);
+          const cart3 = [10,2];
 
           var  arr=[];
           // console.log("in");
+
+          // top3Objects.length>=3
           if(a!=-1 && b!=-1 && c!=-1)
           {
+            
+            // a=kf1.filter(a);
+            // b=kf2.filter(b);
+            // c=kf3.filter(c);
+            console.log("Distance: ",a,b,c);
             const beacons = [
               { x: cart1[0], y: cart1[1], distance: a },
               { x: cart2[0], y: cart2[1], distance: b },
               { x: cart3[0], y: cart3[1], distance: c },
             ];
-            
+
+            // const beacons = [
+            //   { x: cart1[0], y: cart1[1], distance: top3Objects[0] },
+            //   { x: cart2[0], y: cart2[1], distance: b },
+            //   { x: cart3[0], y: cart3[1], distance: c },
+            // ];            
+
             const userPosition = trilateration(beacons);    
-            arr=getcord(userPosition.x, userPosition.y);       
+            // arr=getcord(userPosition.x, userPosition.y);       
             // console.log(userPosition); 
-            // arr.push(userPosition.x);
-            // arr.push(userPosition.y);
+            arr.push(userPosition.x);
+            arr.push(userPosition.y);
           }
 
           setCordinates(arr);
