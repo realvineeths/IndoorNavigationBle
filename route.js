@@ -1,0 +1,1 @@
+export const routeData={"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":[[77.66417709,12.86148900],[77.66416349,12.86137334],[77.66430172,12.86147617]]}}]}

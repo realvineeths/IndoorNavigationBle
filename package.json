@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@homee/react-native-mapbox-navigation": "^1.1.0",
     "@rnmapbox/maps": "^10.0.15",
     "react": "18.2.0",
     "react-native": "0.72.1",

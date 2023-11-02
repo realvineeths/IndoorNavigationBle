@@ -136,8 +136,8 @@ function useBLE() {
           // c = 1.0827771103723;
 
           const cart1 = cartesian(12.86137334, 77.66416349);
-          const cart2 = cartesian(12.86148900, 77.66417709);
-          const cart3 = cartesian(12.86147617, 77.66430172);
+          const cart2 = cartesian(12.86148900, 77.66417709);//entry
+          const cart3 = cartesian(12.86147617, 77.66430172);//hod room
 
           var  arr=[];
           // console.log("in");

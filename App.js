@@ -14,6 +14,7 @@ import {
 import useBLE from './useBLE';
 import MapboxGL from '@rnmapbox/maps';
 import { statesData } from './data';
+import { routeData } from './route';
 
 MapboxGL.setAccessToken('sk.eyJ1IjoiYWRpdHlhLWxhd2Fua2FyIiwiYSI6ImNsbm4xcHYzaTAxc28ydnBmamJkbndsanUifQ.sglI_YCbc3WMaZNNM_va7A');
 MapboxGL.setConnected(true);
@@ -91,9 +92,17 @@ const App = () => {
           {/* <Button
             onPress={scanForDevices}
             title="Your Location"
-            color="#841584"
-            
+            color="#841584"        
           /> */}
+
+        <MapboxGL.ShapeSource id="line-source" shape={routeData}>
+            <MapboxGL.LineLayer
+              id="line-layer"
+              style={{ lineColor: "blue", lineWidth: 4 }}
+            />
+        </MapboxGL.ShapeSource>
+
+
          </MapboxGL.MapView>
          <View style={styles.ctaButton}>
               <Button title="Start" onPress={scanForDevices}></Button>
