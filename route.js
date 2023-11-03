@@ -1,1 +1,4 @@
-export const routeData={"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":[[77.66417709,12.86148900],[77.66416349,12.86137334],[77.66430172,12.86147617]]}}]}
+import routeArr from "./navigate"
+
+export const routeData={"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":routeArr}}]}
+//[[ 77.66420908805728,12.86135262904988],[ 77.66429140971361,12.86134306181686],[77.66430485247479,12.861416014131246],[ 77.664259076400266, 12.861474967859369],[77.66418179357876,12.861485076841905],[77.6641701097674,12.861404983734475]]

@@ -15,6 +15,8 @@ import useBLE from './useBLE';
 import MapboxGL from '@rnmapbox/maps';
 import { statesData } from './data';
 import { routeData } from './route';
+import navigate from './navigate';
+import { useState } from 'react';
 
 MapboxGL.setAccessToken('sk.eyJ1IjoiYWRpdHlhLWxhd2Fua2FyIiwiYSI6ImNsbm4xcHYzaTAxc28ydnBmamJkbndsanUifQ.sglI_YCbc3WMaZNNM_va7A');
 MapboxGL.setConnected(true);
@@ -32,6 +34,8 @@ const MAP_HEIGHT = Dimensions.get('window').height;
 const App = () => {
   // const coordinates = [77.6649683,12.8619337];
   const { requestPermissions, scanForPeripherals, distance,cordinates } = useBLE();
+  const [routeArr, setRouteArr] = useState([]);
+  // var routeArr=[];
   const scanForDevices = () => {
     requestPermissions(isGranted => {
       console.log(isGranted, 'grant');
@@ -40,8 +44,17 @@ const App = () => {
       }
     });
   };  
-  // console.log(cordinates);
   const coordinates = [77.66431108610999, 12.861412619615328];  
+  const startNavigation=()=>{
+    const inputCord=[77.66429275926333,12.861467014260677];//214
+    const destinationNode = '6'; // Example destination node
+    let newRoute=navigate(inputCord,destinationNode);
+    newRoute.unshift(inputCord);
+    setRouteArr(newRoute);   
+    console.log(routeArr); 
+  }
+  // console.log(cordinates);
+  
   return (
     <View style={styles.page}>
       <View style={styles.container}>
@@ -71,7 +84,8 @@ const App = () => {
             ))
             }
             {/* <MapboxGL.PointAnnotation id="marker" coordinate={coordinates}  /> */}
-          <MapboxGL.MarkerView id={"marker"} coordinate={[cordinates[1],cordinates[0]]}>
+          {/* <MapboxGL.MarkerView id={"marker"} coordinate={[cordinates[1],cordinates[0]]}> */}
+          <MapboxGL.MarkerView id={"marker"} coordinate={[77.66429275926333,12.861467014260677]}>
                       <View>
                         <View style={styles.markerContainer}>
                           <Image
@@ -95,18 +109,26 @@ const App = () => {
             color="#841584"        
           /> */}
 
-        <MapboxGL.ShapeSource id="line-source" shape={routeData}>
+        {/* <MapboxGL.ShapeSource id="line-source" shape={routeData}>
             <MapboxGL.LineLayer
               id="line-layer"
-              style={{ lineColor: "blue", lineWidth: 4 }}
+              style={{ lineColor: "blue", lineWidth: 6 }}
             />
-        </MapboxGL.ShapeSource>
-
+        </MapboxGL.ShapeSource> */}
+        <MapboxGL.ShapeSource id="line-source" shape={{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":routeArr}}]}}>
+            <MapboxGL.LineLayer
+              id="line-layer"
+              style={{ lineColor: "blue", lineWidth: 6 }}
+            />
+        </MapboxGL.ShapeSource>        
 
          </MapboxGL.MapView>
-         <View style={styles.ctaButton}>
+         {/* <View style={styles.ctaButton}>
               <Button title="Start" onPress={scanForDevices}></Button>
-          </View>         
+          </View>          */}
+         <View style={styles.ctaButton}>
+              <Button title="Route" onPress={startNavigation}></Button>
+          </View>               
          </View>
        </View>
   );
