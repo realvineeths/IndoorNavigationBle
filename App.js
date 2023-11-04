@@ -17,6 +17,9 @@ import { statesData } from './data';
 import { routeData } from './route';
 import navigate from './navigate';
 import { useState } from 'react';
+import SearchBar from './SearchBar';
+import List from './List';
+
 
 MapboxGL.setAccessToken('sk.eyJ1IjoiYWRpdHlhLWxhd2Fua2FyIiwiYSI6ImNsbm4xcHYzaTAxc28ydnBmamJkbndsanUifQ.sglI_YCbc3WMaZNNM_va7A');
 MapboxGL.setConnected(true);
@@ -28,14 +31,40 @@ LogBox.ignoreLogs(['new NativeEventEmitter()']);
 const MAP_WIDTH = Dimensions.get('window').width;
 const MAP_HEIGHT = Dimensions.get('window').height;
 
-// console.log(MAP_HEIGHT,MAP_WIDTH);
+
 
 
 const App = () => {
   // const coordinates = [77.6649683,12.8619337];
   const { requestPermissions, scanForPeripherals, distance,cordinates } = useBLE();
   const [routeArr, setRouteArr] = useState([]);
-  // var routeArr=[];
+  const [searchPhrase, setSearchPhrase] = useState("");
+  const [clicked, setClicked] = useState(false);
+  const [clickedListItem, setClickedListItem] = useState(null);
+  const [Data, setData] = useState([
+    {
+        "id": "1",
+        "name": "JavaScript",
+        "details": "Web Dev, Game Dev, Mobile Apps"
+    },
+    {
+        "id": "2",
+        "name": "Python",
+        "details": "BackEnd, Data Science"
+    }
+  ]);
+
+  const handleItemClick = (item) => {
+    setClickedListItem(item);
+  };
+  const handleSearchBarClick = () => {
+    setClicked(true);
+  };
+  const toggleClicked = () => {
+    setClicked(!clicked); // Toggle the clicked state
+  };
+
+  console.log(clickedListItem,clicked);
   const scanForDevices = () => {
     requestPermissions(isGranted => {
       console.log(isGranted, 'grant');
@@ -53,23 +82,34 @@ const App = () => {
     setRouteArr(newRoute);   
     console.log(routeArr); 
   }
-  
-  
+
   return (
     <View style={styles.page}>
       <View style={styles.container}>
-        <MapboxGL.MapView style={styles.map}>
-          <MapboxGL.Camera zoomLevel={20}
-           centerCoordinate={coordinates} />          
-            {
-            statesData.features.map((feature, index) => (
-              
+        <SearchBar
+          searchPhrase={searchPhrase}
+          setSearchPhrase={setSearchPhrase}
+          clicked={clicked}
+          setClicked={setClicked}
+          onSearchBarClick={handleSearchBarClick}
+        />
+        {clicked && (
+          <List
+            searchPhrase={searchPhrase}
+            data={Data}
+            setClicked={setClicked}
+            onItemClick={handleItemClick}
+            toggleClicked={toggleClicked}
+          />
+        )}
+        {!clicked && ( // Only show the map and other components if 'clicked' is false
+          <>
+          <MapboxGL.MapView style={styles.map}>
+            <MapboxGL.Camera zoomLevel={20} centerCoordinate={[77.66431108610999, 12.861412619615328]} />
+            {statesData.features.map((feature, index) => (
               <MapboxGL.ShapeSource key={`source${index}`} id={`source${index}`} shape={feature}>
-                <MapboxGL.FillLayer id={`fill${index}`} style={{ fillColor: "white" }}  />
-                <MapboxGL.LineLayer
-                  id={`line${index}`}
-                  style={{ lineColor: "red", lineWidth: 2 }} 
-                />
+                <MapboxGL.FillLayer id={`fill${index}`} style={{ fillColor: "white" }} />
+                <MapboxGL.LineLayer id={`line${index}`} style={{ lineColor: "red", lineWidth: 2 }} />
                 <MapboxGL.SymbolLayer
                   id={`label${index}`}
                   style={{
@@ -81,59 +121,39 @@ const App = () => {
                   }}
                 />
               </MapboxGL.ShapeSource>
-            ))
-            }
-            {/* <MapboxGL.PointAnnotation id="marker" coordinate={coordinates}  /> */}
-          {/* <MapboxGL.MarkerView id={"marker"} coordinate={[cordinates[1],cordinates[0]]}> */}
-          <MapboxGL.MarkerView id={"marker"} coordinate={[77.66429275926333,12.861467014260677]}>
-                      <View>
-                        <View style={styles.markerContainer}>
-                          <Image
-                            source={require("./images3.png")}
-                            style={{
-                              width: 20,
-                              height: 30,                              
-                              resizeMode: "cover",
-                            }}
-                          />
-                        </View>
-                      </View>
+            ))}
+            <MapboxGL.MarkerView id={"marker"} coordinate={[77.66429275926333, 12.861467014260677]}>
+              <View>
+                <View style={styles.markerContainer}>
+                  <Image
+                    source={require("./images3.png")}
+                    style={{
+                      width: 20,
+                      height: 30,
+                      resizeMode: "cover",
+                    }}
+                  />
+                </View>
+              </View>
             </MapboxGL.MarkerView>
-           {/* <TouchableOpacity onPress={scanForDevices} style={styles.ctaButton}>
-           <Text style={styles.ctaButtonText}>Start</Text>
-           </TouchableOpacity> */}
-
-          {/* <Button
-            onPress={scanForDevices}
-            title="Your Location"
-            color="#841584"        
-          /> */}
-
-        {/* <MapboxGL.ShapeSource id="line-source" shape={routeData}>
-            <MapboxGL.LineLayer
-              id="line-layer"
-              style={{ lineColor: "blue", lineWidth: 6 }}
-            />
-        </MapboxGL.ShapeSource> */}
-        <MapboxGL.ShapeSource id="line-source" shape={{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":routeArr}}]}}>
-            <MapboxGL.LineLayer
-              id="line-layer"
-              style={{ lineColor: "blue", lineWidth: 6 }}
-            />
-        </MapboxGL.ShapeSource>        
-
-         </MapboxGL.MapView>
-         {/* <View style={styles.ctaButton}>
-              <Button title="Start" onPress={scanForDevices}></Button>
-          </View>          */}
-         <View style={styles.ctaButton}>
-              <Button title="Route" onPress={startNavigation}></Button>
+            <MapboxGL.ShapeSource id="line-source" shape={{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":routeArr}}]}}>
+              <MapboxGL.LineLayer
+                id="line-layer"
+                style={{ lineColor: "blue", lineWidth: 6 }}
+              />
+            </MapboxGL.ShapeSource>
+          </MapboxGL.MapView>
+          <View style={styles.ctaButton}>
+            <Button title="Route" onPress={startNavigation}></Button>
           </View>
-         </View>
-       </View>
+          
+          
+          </>
+        )}
+      </View>
+    </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   page: {
@@ -153,104 +173,17 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     height: 70,
   },
-  textContainer: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  text: {
-    textAlign: "center",
-    paddingHorizontal: 5,
-    flex: 1,
-  },
   ctaButton: {
     backgroundColor: 'purple',
     justifyContent: 'center',
     alignItems: 'center',
-    // height: 50,
-    // marginHorizontal: 20,
-    // marginBottom: 5,
     borderRadius: 8,
-    zIndex:10,
-    position:'absolute',
-    backgroundColor:"transparent",
-    top:"90%",
-    left:"40%"
+    zIndex: 10,
+    position: 'absolute',
+    top: "90%",
+    left: "40%"
   }
 });
 
-
 export default App;
 
-
-
-
-// const App = () => {
-//   const { requestPermissions, scanForPeripherals, distance,cordinates } = useBLE();
-//   // console.log(cordinates);
-//   const scanForDevices = () => {
-//     requestPermissions(isGranted => {
-//       console.log(isGranted, 'grant');
-//       if (isGranted) {
-//         scanForPeripherals();
-//       }
-//     });
-//   };
-
-
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <View style={styles.heartRateTitleWrapper}>
-//         <Text style={{ fontSize: 50, color: 'black' }}>Position:</Text>
-//         <View>
-//         <Text style={{ fontSize: 50, color: 'black' }}>x:{cordinates.x}</Text>
-//         <Text style={{ fontSize: 50, color: 'black' }}>y:{cordinates.y}</Text>        
-//         </View>
-//       </View>
-//       <TouchableOpacity onPress={scanForDevices} style={styles.ctaButton}>
-//         <Text style={styles.ctaButtonText}>Start</Text>
-//       </TouchableOpacity>
-//     </SafeAreaView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#f2f2f2',
-//   },
-//   heartRateTitleWrapper: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   heartRateTitleText: {
-//     fontSize: 30,
-//     fontWeight: 'bold',
-//     textAlign: 'center',
-//     marginHorizontal: 20,
-//     color: 'black',
-//   },
-//   heartRateText: {
-//     fontSize: 25,
-//     marginTop: 15,
-//   },
-//   ctaButton: {
-//     backgroundColor: 'purple',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     height: 50,
-//     marginHorizontal: 20,
-//     marginBottom: 5,
-//     borderRadius: 8,
-//   },
-//   ctaButtonText: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     color: 'white',
-//   },
-// });
-
-// export default App;
