@@ -128,7 +128,7 @@ const App = () => {
           </View>          */}
          <View style={styles.ctaButton}>
               <Button title="Route" onPress={startNavigation}></Button>
-          </View>               
+          </View>
          </View>
        </View>
   );
