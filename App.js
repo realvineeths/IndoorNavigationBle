@@ -53,7 +53,7 @@ const App = () => {
     setRouteArr(newRoute);   
     console.log(routeArr); 
   }
-  // console.log(cordinates);
+  
   
   return (
     <View style={styles.page}>
