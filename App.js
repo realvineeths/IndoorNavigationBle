@@ -9,7 +9,8 @@ import {
   LogBox,
   Image,
   Button,
-  Dimensions
+  Dimensions,
+  Keyboard
 } from 'react-native';
 import useBLE from './useBLE';
 import MapboxGL from '@rnmapbox/maps';
@@ -40,32 +41,70 @@ const App = () => {
   const [routeArr, setRouteArr] = useState([]);
   const [searchPhrase, setSearchPhrase] = useState("");
   const [clicked, setClicked] = useState(false);
+  const [destinationId, setDestinationId] = useState("1");
   const [clickedListItem, setClickedListItem] = useState(null);
+  const [showRoute,setShowRoute]=useState(false);
   const [Data, setData] = useState([
     {
         "id": "1",
-        "name": "JavaScript",
-        "details": "Web Dev, Game Dev, Mobile Apps"
+        "name": "210",
+        "details": "Prajwala Ma'am Cabin"
     },
     {
         "id": "2",
-        "name": "Python",
-        "details": "BackEnd, Data Science"
-    }
+        "name": "HOD(CSE)",
+        "details": "Sandhesh Sir Cabin"
+    },
+    {
+      "id": "3",
+      "name": "213",
+      "details": "Rohit Sir Cabin"
+    },  
+    {
+      "id": "4",
+      "name": "206",
+      "details": "Nivedita Ma'am Cabin"
+    },      
+    {
+      "id": "5",
+      "name": "Equipment Room",
+      "details": ""
+    },
+    {
+      "id": "6",
+      "name": "209",
+      "details": "Ruby Ma'am Cabin"
+    }    
   ]);
 
+
+  // const handleSearchPhrase=(searchPhrase)=>{
+  //   setSearchPhrase(searchPhrase);
+  // }
+
   const handleItemClick = (item) => {
+    // console.log("itemm",item);
     setClickedListItem(item);
+    item && setSearchPhrase(item.name);
+    // setDestinationId(clickedListItem.id);
   };
   const handleSearchBarClick = () => {
     setClicked(true);
   };
   const toggleClicked = () => {
-    setClicked(!clicked); // Toggle the clicked state
+    setClicked(false);
+    Keyboard.dismiss();
+    // setClicked(!clicked); // Toggle the clicked state
   };
 
-  console.log(clickedListItem,clicked);
+  // clickedListItem && setDestinationId(clickedListItem.id);
+  if(clickedListItem)
+  {
+    console.log(clickedListItem.id,clicked);
+  }
+  // console.log(destinationId,clicked);
   const scanForDevices = () => {
+
     requestPermissions(isGranted => {
       console.log(isGranted, 'grant');
       if (isGranted) {
@@ -76,12 +115,16 @@ const App = () => {
   const coordinates = [77.66431108610999, 12.861412619615328];  
   const startNavigation=()=>{
     const inputCord=[77.66429275926333,12.861467014260677];//214
-    const destinationNode = '6'; // Example destination node
+    // const destinationNode = '6'; // Example destination node
+    const destinationNode = clickedListItem?clickedListItem.id:'1'; // Example destination node
     let newRoute=navigate(inputCord,destinationNode);
     newRoute.unshift(inputCord);
     setRouteArr(newRoute);   
+    setShowRoute(true);
     console.log(routeArr); 
   }
+
+  // console.log(showRoute);
 
   return (
     <View style={styles.page}>
@@ -99,7 +142,7 @@ const App = () => {
             data={Data}
             setClicked={setClicked}
             onItemClick={handleItemClick}
-            toggleClicked={toggleClicked}
+            toggleClicked={toggleClicked}            
           />
         )}
         {!clicked && ( // Only show the map and other components if 'clicked' is false
@@ -136,18 +179,45 @@ const App = () => {
                 </View>
               </View>
             </MapboxGL.MarkerView>
-            <MapboxGL.ShapeSource id="line-source" shape={{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":routeArr}}]}}>
+            {showRoute && <MapboxGL.ShapeSource id="line-source" shape={{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":routeArr}}]}}>
               <MapboxGL.LineLayer
                 id="line-layer"
-                style={{ lineColor: "blue", lineWidth: 6 }}
+                style={{ lineColor: "black", lineWidth: 6 }}
               />
             </MapboxGL.ShapeSource>
+            }
+            {routeArr.length>0 && showRoute && <MapboxGL.MarkerView id={"marker2"} coordinate={routeArr[routeArr.length-1]}>
+              <View>
+                <View style={styles.markerContainer}>
+                  <Image
+                    source={require("./location2.png")}
+                    style={{
+                      width: 20,
+                      height: 30,
+                      resizeMode: "cover",
+                    }}
+                  />
+                </View>
+              </View>
+            </MapboxGL.MarkerView>      
+            }      
           </MapboxGL.MapView>
-          <View style={styles.ctaButton}>
+          <View style={styles.ctaButton1}>
+            <Button title="Locate" onPress={scanForDevices}></Button>
+          </View>
+
+          <View style={styles.ctaButton2}>
             <Button title="Route" onPress={startNavigation}></Button>
           </View>
+
+          {showRoute && <View style={styles.ctaButton3}>
+            <Button title="Cancel Route" onPress={()=>{
+              setShowRoute(false)
+            }} color="red" ></Button>
+          </View>
+          }
           
-          
+
           </>
         )}
       </View>
@@ -173,16 +243,36 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     height: 70,
   },
-  ctaButton: {
+  ctaButton1: {
     backgroundColor: 'purple',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
     zIndex: 10,
     position: 'absolute',
-    top: "90%",
-    left: "40%"
-  }
+    top: "85%",
+    left: "20%"
+  },
+  ctaButton2: {
+    backgroundColor: 'purple',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    zIndex: 10,
+    position: 'absolute',
+    top: "85%",
+    left: "60%"
+  },
+  ctaButton3: {
+    backgroundColor: 'red',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    zIndex: 10,
+    position: 'absolute',
+    top: "91%",
+    left: "30%"
+  }  
 });
 
 export default App;

@@ -10,7 +10,7 @@ function dijkstraWithPredecessors(graph, startNode, endNode) {
   
     distances[startNode] = 0;
   
-    while (unvisitedNodes.length > 0) {
+    while (unvisitedNodes.length > 0) {//relaxation of the edges of the graph
       let currentNode = null;
       for (const node of unvisitedNodes) {
         if (!currentNode || distances[node] < distances[currentNode]) {
@@ -42,7 +42,7 @@ function dijkstraWithPredecessors(graph, startNode, endNode) {
   
     const path = [];
     let currentNode = endNode;
-    while (currentNode !== null) {
+    while (currentNode !== null) {//to get the array which consists of nodes travelled through to get destination node from source node.
       path.unshift(currentNode);
       currentNode = predecessors[currentNode];
     }
