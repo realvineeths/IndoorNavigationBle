@@ -14,7 +14,7 @@ LogBox.ignoreLogs(['new NativeEventEmitter()']);
 
 const App = () => {
   const { requestPermissions, scanForPeripherals, distance,cordinates } = useBLE();
-  console.log(cordinates);
+  // console.log(cordinates);
   const scanForDevices = () => {
     requestPermissions(isGranted => {
       console.log(isGranted, 'grant');
@@ -49,6 +49,7 @@ const App = () => {
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

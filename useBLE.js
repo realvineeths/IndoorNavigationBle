@@ -19,9 +19,11 @@ let beaconData = [];
 // var b = 3.686945064519575;
 // var c = 4.298662347082277;
 // var c = 1.0827771103723;
-var a=-1;
-var b=-1;
-var c=-1;
+var a=1000;
+var b=1000;
+var c=1000;
+var d=1000;
+var e=1000;
 
 
 function cartesian(latitude, longitude) {
@@ -102,7 +104,8 @@ function useBLE() {
   const kf1 = new KalmanFilter({R: 0.01, Q: 2});
   const kf2 = new KalmanFilter({R: 0.01, Q: 2});
   const kf3 = new KalmanFilter({R: 0.01, Q: 2});
-
+  const kf4 = new KalmanFilter({R: 0.01, Q: 2});
+  const kf5 = new KalmanFilter({R: 0.01, Q: 2});
 
   // var cordinates=[a,b,c];
   const scanForPeripherals = () =>
@@ -134,7 +137,7 @@ function useBLE() {
           //   beaconData.pop();
           // }
 
-          const top3Objects = beaconData.slice(0, 3);
+          // const top3Objects = beaconData.slice(0, 3);
 
           if(beacon.id.includes('37')){
             a=beacon.distance;
@@ -145,41 +148,99 @@ function useBLE() {
           if(beacon.id.includes('48')){
             c=beacon.distance;
           }
-
+          if(beacon.id.includes('47')){
+            d=beacon.distance;
+          }
+          if(beacon.id.includes('3C')){
+            e=beacon.distance;
+          }   
 
           // const cart1 = cartesian(12.86137334, 77.66416349);
-          const cart1 = [2,10];
+          const cart3 = [0,10];//c
           // const cart2 = cartesian(12.86148900, 77.66417709);
-          const cart2 = [10,10];
+          const cart2 = [0,1];//b
           // const cart3 = cartesian(12.86147617, 77.66430172);
-          const cart3 = [10,2];
+          const cart1 = [10,0];//a
+          const cart4 = [5,9];//d
+          const cart5 = [11,8];//e
 
           var  arr=[];
           // console.log("in");
 
-          // top3Objects.length>=3
-          if(a!=-1 && b!=-1 && c!=-1)
+          // console.log(kf1,kf2,kf3,kf4,kf5);
+          // console.log(a,b,c,d,e);
+          let cnt=0;
+          if(a!=1000)
           {
-            
-            // a=kf1.filter(a);
-            // b=kf2.filter(b);
-            // c=kf3.filter(c);
-            console.log("Distance: ",a,b,c);
-            const beacons = [
-              { x: cart1[0], y: cart1[1], distance: a },
-              { x: cart2[0], y: cart2[1], distance: b },
-              { x: cart3[0], y: cart3[1], distance: c },
-            ];
+            cnt++;
+          }
+          if(b!=1000)
+          {
+            cnt++;
+          }
+          if(c!=1000)
+          {
+            cnt++;
+          }
+          if(d!=1000)
+          {
+            cnt++;
+          }
+          if(e!=1000)
+          {
+            cnt++;
+          }          
 
+          // top3Objects.length>=3
+          if(cnt>=3)
+          {
+            a=kf1.filter(a);
+            b=kf2.filter(b);
+            c=kf3.filter(c);
+            d=kf4.filter(d);
+            e=kf5.filter(e);
+            // console.log("Distance: ",a,b,c,d,e);
+            // const beacons = [
+            //   { x: cart1[0], y: cart1[1], distance: a },
+            //   { x: cart2[0], y: cart2[1], distance: b },
+            //   { x: cart3[0], y: cart3[1], distance: c },
+            // ];
+            const beaconArr=[
+              {
+                x: cart1[0], y: cart1[1],
+                distance:a
+              },
+              {
+                x: cart2[0], y: cart2[1],
+                distance:b                
+              },
+              {
+                x: cart3[0], y: cart3[1],
+                distance:c
+              },
+              {
+                x: cart4[0], y: cart4[1],
+                distance:d
+              },
+              {
+                x: cart5[0], y: cart5[1],
+                distance:e
+              }
+            ]
+
+            beaconArr.sort((a, b) => a.distance - b.distance);
+            const top3Objects =beaconArr.slice(0, 3);
+            // console.log(top3Objects);
+            // console.log(beaconArr);
             // const beacons = [
             //   { x: cart1[0], y: cart1[1], distance: top3Objects[0] },
             //   { x: cart2[0], y: cart2[1], distance: b },
             //   { x: cart3[0], y: cart3[1], distance: c },
             // ];            
 
-            const userPosition = trilateration(beacons);    
+            const userPosition = trilateration(top3Objects);    
             // arr=getcord(userPosition.x, userPosition.y);       
-            // console.log(userPosition); 
+            console.log(userPosition); 
             arr.push(userPosition.x);
             arr.push(userPosition.y);
           }
