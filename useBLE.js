@@ -9,16 +9,9 @@ import DeviceInfo from 'react-native-device-info';
 import {MathTool} from './MathTool';
 import KalmanFilter from 'kalmanjs';
 
-
 const bleManager = new BleManager();
 let beaconData = [];
 
-// var a = 4.8034392256422;
-// var a = 5.843414133735177;
-// var b = 0.27667516330004;
-// var b = 3.686945064519575;
-// var c = 4.298662347082277;
-// var c = 1.0827771103723;
 var a=1000;
 var b=1000;
 var c=1000;
@@ -26,9 +19,120 @@ var d=1000;
 var e=1000;
 
 
+// function cartesian(latitude, longitude) {
+//   const MAP_WIDTH = 360;
+//   const MAP_HEIGHT = 761.6666666666666;
+
+//   var x = (MAP_WIDTH / 360.0) * (180 + longitude);
+//   var y = (MAP_HEIGHT / 180.0) * (90 - latitude);
+
+//   return [x*Math.pow(10,4), y*Math.pow(10,4)];
+// }
+
+// function getcord(x, y) {
+//   x=x*Math.pow(10,-4);
+//   y=y*Math.pow(10,-4);
+//   const MAP_WIDTH = 360;
+//   const MAP_HEIGHT = 761.6666666666666;
+//   var longitude = (x * (360.0 / MAP_WIDTH)) - 180;
+//   var latitude = 90 - (y * (180.0 / MAP_HEIGHT));
+//   return [latitude, longitude]
+// }
+
+
+// function trilateration(beacons) {
+//   // beacons: array of { x, y, distance }
+
+//   const beacon1 = beacons[0];
+//   const beacon2 = beacons[1];
+//   const beacon3 = beacons[2];
+
+//   const A = 2 * (beacon2.x - beacon1.x);
+//   const B = 2 * (beacon2.y - beacon1.y);
+//   const C = Math.pow(beacon1.distance, 2) - Math.pow(beacon2.distance, 2) - Math.pow(beacon1.x, 2) + Math.pow(beacon2.x, 2) - Math.pow(beacon1.y, 2) + Math.pow(beacon2.y, 2);
+
+//   const D = 2 * (beacon3.x - beacon2.x);
+//   const E = 2 * (beacon3.y - beacon2.y);
+//   const F = Math.pow(beacon2.distance, 2) - Math.pow(beacon3.distance, 2) - Math.pow(beacon2.x, 2) + Math.pow(beacon3.x, 2) - Math.pow(beacon2.y, 2) + Math.pow(beacon3.y, 2);
+
+//   const x = (C - (F * B / E)) / (A - (D * B / E));
+//   const y = (F - (D * C / A)) / (E - (B * D / A));
+
+//   return { x, y };
+// }
+
+function trilateration(beacons) {
+  // Ensure there are exactly three beacons
+  if (beacons.length !== 3) {
+      throw new Error('Trilateration requires exactly three beacons.');
+  }
+
+  // Sort beacons by distance in ascending order
+  const sortedBeacons = beacons.sort((a, b) => a.distance - b.distance);
+
+  const beacon1 = sortedBeacons[0];
+  const beacon2 = sortedBeacons[1];
+  const beacon3 = sortedBeacons[2];
+
+  if (!isIntersection(beacon1, beacon2, beacon1.distance, beacon2.distance)) {
+      return calculateMidpoint(beacon1, beacon2);
+  }
+
+  // Calculate the intersection points of the circles formed by the two nearest beacons
+  const intersectionPoints = calculateCircleIntersection(beacon1, beacon2);
+  // console.log(intersectionPoints);
+  // Choose the intersection point closest to the third beacon
+  const closestIntersection = intersectionPoints.sort((p1, p2) => {
+      return getDistance(p1, beacon3) - getDistance(p2, beacon3);
+  })[0];
+
+
+
+  return closestIntersection;
+}
+
+function isIntersection(beacon1, beacon2, r1, r2) {
+  const distanceBetweenCenters = getDistance(beacon1, beacon2);
+  const sumOfRadii = r1 + r2;
+  const differenceOfRadii = Math.abs(r1 - r2);
+
+  // Circles intersect if the distance between their centers is less than the sum of their radii
+  // and greater than the absolute difference of their radii
+  return distanceBetweenCenters < sumOfRadii && distanceBetweenCenters > differenceOfRadii;
+}
+
+function calculateMidpoint(point1, point2) {
+  const x = (point1.x + point2.x) / 2;
+  const y = (point1.y + point2.y) / 2;
+  return { x, y };
+}
+
+// Helper function to calculate the intersection points of two circles
+function calculateCircleIntersection(beacon1, beacon2) {
+  const d = getDistance(beacon1, beacon2);
+  const a = (Math.pow(beacon1.distance, 2) - Math.pow(beacon2.distance, 2) + Math.pow(d, 2)) / (2 * d);
+  const h = Math.sqrt(Math.pow(beacon1.distance, 2) - Math.pow(a, 2));
+
+  const x2 = beacon1.x + (a / d) * (beacon2.x - beacon1.x);
+  const y2 = beacon1.y + (a / d) * (beacon2.y - beacon1.y);
+
+  const x3_1 = x2 + (h / d) * (beacon2.y - beacon1.y);
+  const y3_1 = y2 - (h / d) * (beacon2.x - beacon1.x);
+
+  const x3_2 = x2 - (h / d) * (beacon2.y - beacon1.y);
+  const y3_2 = y2 + (h / d) * (beacon2.x - beacon1.x);
+
+  return [{ x: x3_1, y: y3_1 }, { x: x3_2, y: y3_2 }];
+}
+
+// Helper function to calculate the distance between two points
+function getDistance(point1, point2) {
+  return Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2));
+}
+
 function cartesian(latitude, longitude) {
-  const MAP_WIDTH = 360;
-  const MAP_HEIGHT = 761.6666666666666;
+  const MAP_WIDTH = 3800;
+  const MAP_HEIGHT = 2000.6666666666666;
 
   var x = (MAP_WIDTH / 360.0) * (180 + longitude);
   var y = (MAP_HEIGHT / 180.0) * (90 - latitude);
@@ -40,34 +144,15 @@ function cartesian(latitude, longitude) {
 function getcord(x, y) {
   x=x*Math.pow(10,-4);
   y=y*Math.pow(10,-4);
-  const MAP_WIDTH = 360;
-  const MAP_HEIGHT = 761.6666666666666;
+  const MAP_WIDTH = 3800;
+  const MAP_HEIGHT = 2000.6666666666666;
+  // const MAP_WIDTH = 360;
+  // const MAP_HEIGHT = 761.6666666666666;
   var longitude = (x * (360.0 / MAP_WIDTH)) - 180;
   var latitude = 90 - (y * (180.0 / MAP_HEIGHT));
   return [latitude, longitude]
 }
 
-
-function trilateration(beacons) {
-  // beacons: array of { x, y, distance }
-
-  const beacon1 = beacons[0];
-  const beacon2 = beacons[1];
-  const beacon3 = beacons[2];
-
-  const A = 2 * (beacon2.x - beacon1.x);
-  const B = 2 * (beacon2.y - beacon1.y);
-  const C = Math.pow(beacon1.distance, 2) - Math.pow(beacon2.distance, 2) - Math.pow(beacon1.x, 2) + Math.pow(beacon2.x, 2) - Math.pow(beacon1.y, 2) + Math.pow(beacon2.y, 2);
-
-  const D = 2 * (beacon3.x - beacon2.x);
-  const E = 2 * (beacon3.y - beacon2.y);
-  const F = Math.pow(beacon2.distance, 2) - Math.pow(beacon3.distance, 2) - Math.pow(beacon2.x, 2) + Math.pow(beacon3.x, 2) - Math.pow(beacon2.y, 2) + Math.pow(beacon3.y, 2);
-
-  const x = (C - (F * B / E)) / (A - (D * B / E));
-  const y = (F - (D * C / A)) / (E - (B * D / A));
-
-  return { x, y };
-}
 
 
 
@@ -155,14 +240,18 @@ function useBLE() {
             e=beacon.distance;
           }   
 
-          // const cart1 = cartesian(12.86137334, 77.66416349);
-          const cart3 = [0,10];//c
-          // const cart2 = cartesian(12.86148900, 77.66417709);
-          const cart2 = [0,1];//b
-          // const cart3 = cartesian(12.86147617, 77.66430172);
-          const cart1 = [10,0];//a
-          const cart4 = [5,9];//d
-          const cart5 = [11,8];//e
+          // const cart3 = [0,10];//c
+          // const cart2 = [0,1];//b
+          // const cart1 = [10,0];//a
+          // const cart4 = [5,9];//d
+          // const cart5 = [11,8];//e
+          const cart1 = cartesian(12.86137334, 77.66416349);//conf
+          const cart2 = cartesian(12.86148900, 77.66417709);//hod
+          const cart3 = cartesian(12.86147617, 77.66430172);//entra
+          const cart4 = cartesian(12.86140970,77.66431894);//stair
+          const cart5 = cartesian(12.86133558,77.66429186);//equip
+
+
 
           var  arr=[];
           // console.log("in");
@@ -239,10 +328,10 @@ function useBLE() {
             // ];            
 
             const userPosition = trilateration(top3Objects);    
-            // arr=getcord(userPosition.x, userPosition.y);       
-            console.log(userPosition); 
-            arr.push(userPosition.x);
-            arr.push(userPosition.y);
+            arr=getcord(userPosition.x, userPosition.y);       
+            // console.log(userPosition); 
+            // arr.push(userPosition.x);
+            // arr.push(userPosition.y);
           }
 
           setCordinates(arr);
