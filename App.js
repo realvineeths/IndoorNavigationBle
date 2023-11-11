@@ -112,7 +112,7 @@ const App = () => {
       }
     });
   };  
-  const coordinates = [77.66431108610999, 12.861412619615328];  
+  // const coordinates = [77.66431108610999, 12.861412619615328];  
   const startNavigation=()=>{
     const inputCord=[77.66429275926333,12.861467014260677];//214
     // const destinationNode = '6'; // Example destination node
@@ -123,7 +123,7 @@ const App = () => {
     setShowRoute(true);
     console.log(routeArr); 
   }
-
+  // console.log(cordinates[0],cordinates[1]);
   // console.log(showRoute);
 
   return (
@@ -165,7 +165,8 @@ const App = () => {
                 />
               </MapboxGL.ShapeSource>
             ))}
-            <MapboxGL.MarkerView id={"marker"} coordinate={[77.66429275926333, 12.861467014260677]}>
+            {/* <MapboxGL.MarkerView id={"marker"} coordinate={[ 77.67569307888573,12.86147281303252]}> */}
+            <MapboxGL.MarkerView id={"marker"} coordinate={[ 77.66460484969053,12.86113345667043]}>
               <View>
                 <View style={styles.markerContainer}>
                   <Image
