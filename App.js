@@ -77,6 +77,7 @@ const App = () => {
     }    
   ]);
 
+  // console.log(cordinates);
 
   // const handleSearchPhrase=(searchPhrase)=>{
   //   setSearchPhrase(searchPhrase);
@@ -114,14 +115,15 @@ const App = () => {
   };  
   // const coordinates = [77.66431108610999, 12.861412619615328];  
   const startNavigation=()=>{
-    const inputCord=[77.66429275926333,12.861467014260677];//214
+    // const inputCord=[77.66429275926333,12.861467014260677];//214
+    const inputCord=cordinates;
     // const destinationNode = '6'; // Example destination node
     const destinationNode = clickedListItem?clickedListItem.id:'1'; // Example destination node
     let newRoute=navigate(inputCord,destinationNode);
     newRoute.unshift(inputCord);
     setRouteArr(newRoute);   
     setShowRoute(true);
-    console.log(routeArr); 
+    // console.log(routeArr); 
   }
   // console.log(cordinates[0],cordinates[1]);
   // console.log(showRoute);
@@ -166,7 +168,7 @@ const App = () => {
               </MapboxGL.ShapeSource>
             ))}
             {/* <MapboxGL.MarkerView id={"marker"} coordinate={[ 77.67569307888573,12.86147281303252]}> */}
-            <MapboxGL.MarkerView id={"marker"} coordinate={[ 77.66460484969053,12.86113345667043]}>
+            <MapboxGL.MarkerView id={"marker"} coordinate={[cordinates[0],cordinates[1]]}>
               <View>
                 <View style={styles.markerContainer}>
                   <Image
