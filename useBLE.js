@@ -171,8 +171,8 @@ function useBLE() {
   const kf4 = new KalmanFilter();
   const kf5 = new KalmanFilter();
 
-  // var cordinates=[a,b,c];
-  const scanForPeripherals = () =>
+  function scanForPeripherals()
+  {
     bleManager.startDeviceScan(
       null,
       {
@@ -268,8 +268,6 @@ function useBLE() {
 
             beaconArr.sort((a, b) => a.distance - b.distance);
             const top3Objects =beaconArr.slice(0, 3);
-            
-            // console.log(top3Objects);
 
             const userPosition = trilateration(top3Objects);    
             const userLatLon=getcord(userPosition.x,userPosition.y);
@@ -282,7 +280,6 @@ function useBLE() {
             setCordinates(arr);
           }
 
-          // disCalc(setCordinates);
           setDistance([...beaconData]);
         }
         if (error) {
@@ -292,11 +289,19 @@ function useBLE() {
   );
 
 
+  setTimeout(() => {
+    bleManager.stopDeviceScan();
+    console.log('Scan stopped after 5 seconds.');
+  }, 5000);
+
+  }
+
   return {
     scanForPeripherals,
     requestPermissions,
     distance,
-    cordinates
+    cordinates,
+    setCordinates
   };
 }
 

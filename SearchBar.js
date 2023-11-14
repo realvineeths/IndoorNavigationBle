@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text,TextInput, View, Keyboard, Button ,TouchableWithoutFeedback} from "react-native";
 
-const SearchBar = ({ clicked, searchPhrase, setSearchPhrase, setClicked,onSearchBarClick  }) => {
+const SearchBar = ({ clicked, searchPhrase, setSearchPhrase, setClicked,onSearchBarClick,placeholderText  }) => {
   // console.log("searccc",searchPhrase);
   return (
     <TouchableWithoutFeedback onPress={onSearchBarClick}>
@@ -12,7 +12,8 @@ const SearchBar = ({ clicked, searchPhrase, setSearchPhrase, setClicked,onSearch
         {/* Input field */}
         <TextInput
           style={styles.input}
-          placeholder={searchPhrase && searchPhrase.length>0?searchPhrase:"Search Destination"}
+          // placeholder={searchPhrase && searchPhrase.length>0?searchPhrase:"Search Destination"}
+          placeholder={placeholderText}
           placeholderTextColor="grey" 
           value={searchPhrase}
           onChangeText={setSearchPhrase}

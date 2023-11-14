@@ -10,7 +10,8 @@ import {
   Image,
   Button,
   Dimensions,
-  Keyboard
+  Keyboard,
+  Alert
 } from 'react-native';
 import useBLE from './useBLE';
 import MapboxGL from '@rnmapbox/maps';
@@ -20,6 +21,7 @@ import navigate from './navigate';
 import { useState } from 'react';
 import SearchBar from './SearchBar';
 import List from './List';
+import cordgraph from './cordList';
 
 
 MapboxGL.setAccessToken('sk.eyJ1IjoiYWRpdHlhLWxhd2Fua2FyIiwiYSI6ImNsbm4xcHYzaTAxc28ydnBmamJkbndsanUifQ.sglI_YCbc3WMaZNNM_va7A');
@@ -29,20 +31,19 @@ MapboxGL.setWellKnownTileServer('Mapbox');
 
 LogBox.ignoreLogs(['new NativeEventEmitter()']);
 
-const MAP_WIDTH = Dimensions.get('window').width;
-const MAP_HEIGHT = Dimensions.get('window').height;
-
-
 
 
 const App = () => {
-  // const coordinates = [77.6649683,12.8619337];
-  const { requestPermissions, scanForPeripherals, distance,cordinates } = useBLE();
+  const [searchPhraseSource, setSearchPhraseSource] = useState("");
+  const [searchPhraseDestination, setSearchPhraseDestination] = useState("");
+  const [clickedSource, setClickedSource] = useState(false);
+  const [clickedDestination, setClickedDestination] = useState(false);
+  const { requestPermissions, scanForPeripherals, distance,cordinates,setCordinates } = useBLE();
   const [routeArr, setRouteArr] = useState([]);
   const [searchPhrase, setSearchPhrase] = useState("");
   const [clicked, setClicked] = useState(false);
-  const [destinationId, setDestinationId] = useState("1");
-  const [clickedListItem, setClickedListItem] = useState(null);
+  const [clickedSourceListItem, setClickedSourceListItem] = useState(null);
+  const [clickedDestListItem, setClickedDestListItem] = useState(null);
   const [showRoute,setShowRoute]=useState(false);
   const [Data, setData] = useState([
     {
@@ -77,77 +78,135 @@ const App = () => {
     }    
   ]);
 
-  // console.log(cordinates);
-
-  // const handleSearchPhrase=(searchPhrase)=>{
-  //   setSearchPhrase(searchPhrase);
-  // }
-
-  const handleItemClick = (item) => {
-    // console.log("itemm",item);
-    setClickedListItem(item);
-    item && setSearchPhrase(item.name);
-    // setDestinationId(clickedListItem.id);
+// Function to handle Source item click
+  const handleSourceItemClick = (item) => {
+    console.log('Selected source item:', item);
+    setClickedSourceListItem(item);
+    item && setSearchPhraseSource(item.name);
   };
-  const handleSearchBarClick = () => {
-    setClicked(true);
+
+  // Function to handle destination item click
+  const handleDestItemClick = (item) => {
+    console.log('Selected Destination item:', item);
+    setClickedDestListItem(item);
+    item && setSearchPhraseDestination(item.name);
   };
-  const toggleClicked = () => {
-    setClicked(false);
+
+
+  const handleSearchBarClick = (searchBar) => {
+      if (searchBar === 'source') {
+        setClickedSource(true);
+        setClickedDestination(false); // Reset the clicked state for the destination search bar
+      } else if (searchBar === 'destination') {
+        setClickedDestination(true);
+        setClickedSource(false); // Reset the clicked state for the source search bar
+      }
+    };
+
+  const toggleClicked = (searchBar) => {
+    if (searchBar === 'source') {
+      setClickedSource(false);
+    } else if (searchBar === 'destination') {
+      setClickedDestination(false);
+    }
     Keyboard.dismiss();
-    // setClicked(!clicked); // Toggle the clicked state
   };
 
-  // clickedListItem && setDestinationId(clickedListItem.id);
-  if(clickedListItem)
-  {
-    console.log(clickedListItem.id,clicked);
-  }
-  // console.log(destinationId,clicked);
   const scanForDevices = () => {
-
     requestPermissions(isGranted => {
       console.log(isGranted, 'grant');
       if (isGranted) {
         scanForPeripherals();
       }
+      else
+      {
+        Alert.alert(
+          'Permissions Needed!',
+          'Make Sure You Have Bluetooth and Location Turned ON.',
+          [
+            {
+              text: 'OK',
+              // onPress: () => console.log('OK Pressed'),
+            },
+          ],
+          { cancelable: false }
+        );
+      }
     });
-  };  
-  // const coordinates = [77.66431108610999, 12.861412619615328];  
+    };  
+
   const startNavigation=()=>{
-    // const inputCord=[77.66429275926333,12.861467014260677];//214
-    const inputCord=cordinates;
-    // const destinationNode = '6'; // Example destination node
-    const destinationNode = clickedListItem?clickedListItem.id:'1'; // Example destination node
-    let newRoute=navigate(inputCord,destinationNode);
-    newRoute.unshift(inputCord);
-    setRouteArr(newRoute);   
-    setShowRoute(true);
-    // console.log(routeArr); 
+    const inputCord=clickedSourceListItem?cordgraph[clickedSourceListItem.id]:cordinates;
+    const destinationNode = clickedDestListItem?clickedDestListItem.id:null; // Example destination node
+    // console.log("innn",inputCord,destinationNode,"->",searchPhraseDestination);
+    if(destinationNode)
+    {
+      let newRoute=navigate(inputCord,destinationNode);
+      setCordinates(inputCord)
+      newRoute.unshift(inputCord);
+      setRouteArr(newRoute);   
+      setShowRoute(true);
+    }
+    else
+    {
+      Alert.alert(
+        'Incomplete Data!',
+        'Fill in the Destination You Need to Visit.',
+        [
+          {
+            text: 'OK',
+            // onPress: () => console.log('OK Pressed'),
+          },
+        ],
+        { cancelable: false }
+      );
+    }
   }
-  // console.log(cordinates[0],cordinates[1]);
-  // console.log(showRoute);
 
   return (
     <View style={styles.page}>
       <View style={styles.container}>
-        <SearchBar
-          searchPhrase={searchPhrase}
-          setSearchPhrase={setSearchPhrase}
-          clicked={clicked}
-          setClicked={setClicked}
-          onSearchBarClick={handleSearchBarClick}
+        {!clickedDestination &&<SearchBar
+          searchPhrase={searchPhraseSource}
+          setSearchPhrase={setSearchPhraseSource}
+          clicked={clickedSource}
+          setClicked={() => setClickedSource(!clickedSource)}
+          onSearchBarClick={() => handleSearchBarClick('source')}
+          placeholderText="Search Source"
         />
-        {clicked && (
+        }
+        {(clickedSource) && (
           <List
             searchPhrase={searchPhrase}
             data={Data}
             setClicked={setClicked}
-            onItemClick={handleItemClick}
-            toggleClicked={toggleClicked}            
+            onItemClick={handleSourceItemClick}
+            toggleClicked={toggleClicked}    
+            searchBar="source"        
           />
         )}
-        {!clicked && ( // Only show the map and other components if 'clicked' is false
+        {/* Search bar for Destination */}
+        {!clickedSource && <SearchBar
+          searchPhrase={searchPhraseDestination}
+          setSearchPhrase={setSearchPhraseDestination}
+          clicked={clickedDestination}
+          setClicked={() => setClickedDestination(!clickedDestination)}
+          onSearchBarClick={() => handleSearchBarClick('destination')}
+          placeholderText="Search Destination"
+        />
+        }
+        {(clickedDestination) && (
+          <List
+            searchPhrase={searchPhrase}
+            data={Data}
+            setClicked={setClicked}
+            onItemClick={handleDestItemClick}
+            toggleClicked={toggleClicked}    
+            searchBar="destination"        
+          />
+        )}
+
+        {!(clickedSource || clickedDestination) && ( // Only show the map and other components if both of clicked is false
           <>
           <MapboxGL.MapView style={styles.map}>
             <MapboxGL.Camera zoomLevel={20} centerCoordinate={[77.66431108610999, 12.861412619615328]} />
@@ -166,8 +225,7 @@ const App = () => {
                   }}
                 />
               </MapboxGL.ShapeSource>
-            ))}
-            {/* <MapboxGL.MarkerView id={"marker"} coordinate={[ 77.67569307888573,12.86147281303252]}> */}
+            ))}          
             <MapboxGL.MarkerView id={"marker"} coordinate={[cordinates[0],cordinates[1]]}>
               <View>
                 <View style={styles.markerContainer}>
@@ -216,17 +274,19 @@ const App = () => {
           {showRoute && <View style={styles.ctaButton3}>
             <Button title="Cancel Route" onPress={()=>{
               setShowRoute(false)
+              setSearchPhraseSource("")
+              setSearchPhraseDestination("")
+              setClickedDestListItem(null)
+              setClickedSourceListItem(null)
             }} color="red" ></Button>
           </View>
           }
-          
-
           </>
         )}
       </View>
     </View>
   );
-}
+  }
 
 const styles = StyleSheet.create({
   page: {

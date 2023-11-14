@@ -19,24 +19,24 @@ const Item = ({ name, details,onPress }) => (
 );
 
 // the filter
-const List = ({ searchPhrase, setClicked, data,onItemClick,toggleClicked   }) => {
+const List = ({ searchPhrase, setClicked, data,onItemClick,toggleClicked,searchBar}) => {
   const renderItem = ({ item }) => {
     // when no input, show all
     if (searchPhrase === "") {
       return <Item name={item.name} details={item.details} onPress={() => {onItemClick(item);
-        toggleClicked();
+        toggleClicked(searchBar);
       }} />;
     }
     // filter of the name
     if (item.name.toUpperCase().includes(searchPhrase.toUpperCase().trim().replace(/\s/g, ""))) {
       return <Item name={item.name} details={item.details} onPress={() => {onItemClick(item);
-        toggleClicked();
+        toggleClicked(searchBar);
       }} />;
     }
     // filter of the description
     if (item.details.toUpperCase().includes(searchPhrase.toUpperCase().trim().replace(/\s/g, ""))) {
       return <Item name={item.name} details={item.details} onPress={() => {onItemClick(item);
-        toggleClicked();
+        toggleClicked(searchBar);
       }} />;
     }
   };
