@@ -13,6 +13,7 @@ import KalmanFilter from 'kalmanjs';
 const bleManager = new BleManager();
 let beaconData = [];
 
+
 // var a = 4.8034392256422;
 // var a = 5.843414133735177;
 // var b = 0.27667516330004;
@@ -132,6 +133,7 @@ function getcord(x, y) {
   var latitude = 90 - (y * (180.0 / MAP_HEIGHT));
   return [latitude, longitude]
 }
+
 
 
 
